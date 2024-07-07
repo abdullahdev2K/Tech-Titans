@@ -77,7 +77,11 @@ const Header = ({ toggleSidebar, toggleTheme, isDarkMode }) => {
                                     Home
                                 </Link>
                             </Nav.Link>
-                            <Nav.Link href="#shop">Shop</Nav.Link>
+                            <Nav.Link>
+                                <Link to="/shop">
+                                    Shop
+                                </Link>
+                            </Nav.Link>
                             <NavDropdown title="Categories" id="basic-nav-dropdown" className='d-lg-none'>
                                 <NavDropdown.Item href="#action/3.1">TV</NavDropdown.Item>
                                 <NavDropdown.Divider />

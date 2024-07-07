@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/Home/Home.jsx';
+import Shop from './components/Shop/Shop.jsx';
 import Header from './components/Layouts/Header.jsx';
 import Sidebar from './components/Layouts/Sidebar.jsx';
 import Footer from './components/Layouts/Footer.jsx';
-import SignUp from './components/Signup.jsx';
-import SignIn from './components/Signin.jsx';
+import SignUp from './components/Sign Up/Signup.jsx';
+import SignIn from './components/Sign In/Signin.jsx';
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
           <Route path="/signin" element={<SignIn isDarkMode={isDarkMode} />} />
           <Route path="/signup" element={<SignUp isDarkMode={isDarkMode} />} />
         </Routes>
