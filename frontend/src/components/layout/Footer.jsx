@@ -12,7 +12,7 @@ const Footer = ({ isDarkMode }) => {
     }, []);
 
     return (
-        <footer className={`py-5 ${isDarkMode ? 'bg-dark text-light' : 'bg-light text-dark'}`}>
+        <footer className="py-5 bg-light">
             <Container>
                 <Row className='mb-3 justify-content-center'>
                     <Col sm={6}>
@@ -20,10 +20,10 @@ const Footer = ({ isDarkMode }) => {
                     </Col>
                 </Row>
                 <div className='mb-5 justify-content-center d-flex gap-4 align-items-center'>
-                        <a href="#facebook" className={`text-${isDarkMode ? 'light' : 'dark'}`}><FaFacebook size={24} /></a>
-                        <a href="#instagram" className={`text-${isDarkMode ? 'light' : 'dark'}`}><FaInstagram size={24} /></a>
-                        <a href="#twitter" className={`text-${isDarkMode ? 'light' : 'dark'}`}><FaTwitter size={24} /></a>
-                        <a href="#youtube" className={`text-${isDarkMode ? 'light' : 'dark'}`}><FaYoutube size={24} /></a>
+                        <a href="#facebook" className="text-dark"><FaFacebook size={24} /></a>
+                        <a href="#instagram" className="text-dark"><FaInstagram size={24} /></a>
+                        <a href="#twitter" className="text-dark"><FaTwitter size={24} /></a>
+                        <a href="#youtube" className="text-dark"><FaYoutube size={24} /></a>
                 </div>
                 <Row className='mb-4 row-gap-4 row-gap-lg-0 justify-content-center'>
                     <Col sm={6} lg={3}>
@@ -33,18 +33,18 @@ const Footer = ({ isDarkMode }) => {
                     <Col sm={6} lg={2}>
                         <h5 className='text-capitalize mb-3 text-center text-sm-start'>Quick Links</h5>
                         <ul className='list-unstyled text-center text-sm-start'>
-                            <li><a href="#home">Home</a></li>
-                            <li><a href="#shop">Shop</a></li>
-                            <li><a href="#deals">Latest Deals</a></li>
-                            <li><a href="#contact">Contact Us</a></li>
+                            <li><a href="#home" className="text-decoration-none text-dark">Home</a></li>
+                            <li><a href="#shop" className="text-decoration-none text-dark">Shop</a></li>
+                            <li><a href="#deals" className="text-decoration-none text-dark">Latest Deals</a></li>
+                            <li><a href="#contact" className="text-decoration-none text-dark">Contact Us</a></li>
                         </ul>
                     </Col>
                     <Col sm={6} lg={2}>
                         <h5 className='text-capitalize mb-3 text-center text-sm-start'>Pages</h5>
                         <ul className='list-unstyled text-center text-sm-start'>
-                            <li><a href="#privacy-policy">Privacy Policy</a></li>
-                            <li><a href="#terms-conditions">Terms & Conditions</a></li>
-                            <li><a href="#return-policy">Return Policy</a></li>
+                            <li><a href="#privacy-policy" className='text-dark text-decoration-none'>Privacy Policy</a></li>
+                            <li><a href="#terms-conditions" className='text-dark text-decoration-none'>Terms & Conditions</a></li>
+                            <li><a href="#return-policy" className='text-dark text-decoration-none'>Return Policy</a></li>
                         </ul>
                     </Col>
                     <Col sm={6} lg={3}>

@@ -7,9 +7,17 @@ import Product from '../models/productModel.js';
 const getProducts = asyncHandler(async (req, res) => {
     const pageSize = Number(req.query.limit) || 10;
     const page = Number(req.query.page) || 1;
+    
+    // Default query for all products
+    let query = {};
+    
+    // If the user is not an admin, only fetch products in stock
+    if (!req.user || req.user.role !== 'Admin') {
+        query = { countInStock: { $gt: 0 } };
+    }
 
-    const count = await Product.countDocuments({});
-    const products = await Product.find({})
+    const count = await Product.countDocuments(query);
+    const products = await Product.find(query)
         .limit(pageSize)
         .skip(pageSize * (page - 1));
 
@@ -35,24 +43,30 @@ const getProductById = asyncHandler(async (req, res) => {
 });
 
 // @desc    Create a product
-// @route   POST /api/products
+// @route   POST /api/products/add-new-product
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, brand, category, price, countInStock, images, isFeatured } = req.body;
+    const { name, price, description, category, countInStock, brand, images, isFeatured } = req.body;
+
+    console.log(req.body); // Log the request body for debugging
+
+    if (!name || !price || !description || !category || !countInStock || !brand || !images || !images.length) {
+        return res.status(400).json({ message: 'Please fill all the required fields' });
+    }
 
     const product = new Product({
         name,
-        description,
-        brand,
-        category,
         price,
+        description,
+        category,
         countInStock,
-        images,
-        isFeatured
+        brand,
+        images, // Assuming images is an array of URLs
+        isFeatured: isFeatured === 'true',
     });
 
-    const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
+    await product.save();
+    res.status(201).json(product);
 });
 
 // @desc    Update a product
@@ -70,7 +84,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         product.category = category || product.category;
         product.price = price || product.price;
         product.countInStock = countInStock || product.countInStock;
-        product.images = images || product.images;
+        product.images = images && images.length > 0 ? images : product.images;  // Update only if new images are provided
         product.isFeatured = isFeatured !== undefined ? isFeatured : product.isFeatured;
 
         const updatedProduct = await product.save();
@@ -88,7 +102,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
 
     if (product) {
-        await product.remove();
+        await product.deleteOne(); // Use deleteOne() instead of remove()
         res.json({ message: 'Product removed' });
     } else {
         res.status(404);

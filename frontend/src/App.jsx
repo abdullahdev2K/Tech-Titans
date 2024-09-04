@@ -1,42 +1,62 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './components/Home/Home.jsx';
-import Shop from './components/Shop/Shop.jsx';
-import Header from './components/Layouts/Header.jsx';
-import Sidebar from './components/Layouts/Sidebar.jsx';
-import Footer from './components/Layouts/Footer.jsx';
-import SignUp from './components/Sign Up/Signup.jsx';
-import SignIn from './components/Sign In/Signin.jsx';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import axios from 'axios'; // Ensure axios is imported
+import { fetchUserProfile } from './slices/authSlice.js';
+import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import Homepage from './pages/Homepage'; 
+import Login from './components/auth/Login.jsx'; 
+import Signup from './components/auth/Signup.jsx';
+import Profile from './components/user/Profile.jsx';
+import UpdateProfile from './components/auth/UpdateProfile.jsx';
+import UpdatePassword from './components/auth/UpdatePassword.jsx';
+import ForgotPassword from './components/auth/ForgotPassword.jsx';
+import Dashboard from './components/Dashboard.jsx';
+import AddNewProduct from './components/product/AddNewProduct.jsx';
+import ProductsGetAll from './components/product/ProductsGetAll.jsx';
+import ProductDetails from './components/product/ProductDetails.jsx';
+import UsersGetAll from './components/user/UsersGetAll.jsx';
+import UpdateUser from './components/user/UpdateUser.jsx';
+import UpdateProduct from './components/product/UpdateProduct.jsx';
 import './App.css';
 
 function App() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    document.body.classList.toggle('dark-mode', !isDarkMode);
-  };
-
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        dispatch(fetchUserProfile())
+            .catch(err => {
+                // Handle error (e.g., redirect to login)
+                console.error('Failed to fetch user profile:', err);
+            });
+    }
+  }, [dispatch]);
+ 
   return (
-    <div className={isDarkMode ? 'dark-mode' : ''}>
-      <Router>
-        <Header toggleSidebar={toggleSidebar} toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/signin" element={<SignIn isDarkMode={isDarkMode} />} />
-          <Route path="/signup" element={<SignUp isDarkMode={isDarkMode} />} />
-        </Routes>
-        <Footer isDarkMode={isDarkMode} />
-      </Router>
-    </div>
-  );
+    <Router>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Homepage />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/signup' element={<Signup />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/profile' element={<Profile />} />
+        <Route path='/update-profile' element={<UpdateProfile />} />
+        <Route path='/update-password' element={<UpdatePassword />} />
+        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/addNewProduct' element={<AddNewProduct />} />
+        <Route path='/admin/products' element={<ProductsGetAll />} />
+        <Route path='/product/:id' element={<ProductDetails />} />
+        <Route path='/admin/users' element={<UsersGetAll />} />
+        <Route path='/admin/edituser/:id' element={<UpdateUser />} />
+        <Route path='/admin/updateproduct/:id' element={<UpdateProduct />} />
+      </Routes>
+      <Footer />
+    </Router>
+  )
 }
 
 export default App;
