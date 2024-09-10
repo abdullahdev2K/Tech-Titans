@@ -16,18 +16,17 @@ const upload = multer({ storage });
 
 const productRoutes = express.Router();
 
+productRoutes.route('/reviews')
+  .get(protect, admin, productController.getAllReviews);  // Fetch all reviews
+
 productRoutes.route('/')
   .get(productController.getProducts);  // Fetch all products (public)
 
 productRoutes.route('/top')
   .get(productController.getTopProducts);  // Get top-rated products
-
+  
 productRoutes.route('/:id')
   .get(productController.getProductById);  // Fetch a single product
-
-// Fetch all reviews for a specific product
-productRoutes.route('/:id/reviews')
-  .get(productController.getProductReviews);  // Get all reviews
 
 // Admin routes
 productRoutes.route('/add-new-product')

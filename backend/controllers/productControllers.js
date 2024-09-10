@@ -162,20 +162,6 @@ const getTopProducts = asyncHandler(async (req, res) => {
 const getLatestProducts= asyncHandler(async (req,res) => {
     const products = await Product.find({}).sort({ _id: -1 }).limit(3);
     res.json(products);
-})
-
-// @desc    Fetch all reviews for a product
-// @route   GET /api/products/:id/reviews
-// @access  Public
-const getProductReviews = asyncHandler(async (req, res) => {
-    const product = await Product.findById(req.params.id);
-
-    if (product) {
-        res.json(product.reviews);
-    } else {
-        res.status(404);
-        throw new Error('Product not found');
-    }
 });
 
 // @desc    Get all reviews
@@ -202,8 +188,7 @@ export {
     createProduct, 
     updateProduct, 
     deleteProduct, 
-    createProductReview, 
-    getProductReviews,
+    createProductReview,
     getAllReviews,
     getTopProducts,
     getLatestProducts
