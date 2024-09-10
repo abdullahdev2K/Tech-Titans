@@ -46,11 +46,11 @@ const getProductById = asyncHandler(async (req, res) => {
 // @route   POST /api/products/add-new-product
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, price, description, category, countInStock, brand, images, isFeatured } = req.body;
+    const { name, price, description, specification, category, countInStock, brand, images, isTrending } = req.body;
 
     console.log(req.body); // Log the request body for debugging
 
-    if (!name || !price || !description || !category || !countInStock || !brand || !images || !images.length) {
+    if (!name || !price || !description || !specification || !category || !countInStock || !brand || !images || !images.length) {
         return res.status(400).json({ message: 'Please fill all the required fields' });
     }
 
@@ -58,11 +58,12 @@ const createProduct = asyncHandler(async (req, res) => {
         name,
         price,
         description,
+        specification,
         category,
         countInStock,
         brand,
         images, // Assuming images is an array of URLs
-        isFeatured: isFeatured === 'true',
+        isTrending: isTrending === 'true',
     });
 
     await product.save();
@@ -73,19 +74,20 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
-    const { name, description, brand, category, price, countInStock, images, isFeatured } = req.body;
+    const { name, description, specification, brand, category, price, countInStock, images, isTrending } = req.body;
 
     const product = await Product.findById(req.params.id);
 
     if (product) {
         product.name = name || product.name;
         product.description = description || product.description;
+        product.specification = specification || product.specification;
         product.brand = brand || product.brand;
         product.category = category || product.category;
         product.price = price || product.price;
         product.countInStock = countInStock || product.countInStock;
         product.images = images && images.length > 0 ? images : product.images;  // Update only if new images are provided
-        product.isFeatured = isFeatured !== undefined ? isFeatured : product.isFeatured;
+        product.isTrending = isTrending !== undefined ? isTrending : product.isTrending;
 
         const updatedProduct = await product.save();
         res.json(updatedProduct);
@@ -154,6 +156,46 @@ const getTopProducts = asyncHandler(async (req, res) => {
     res.json(products);
 });
 
+// @desc Get latest products
+// @route GET /api/products/latest
+// @access Public
+const getLatestProducts= asyncHandler(async (req,res) => {
+    const products = await Product.find({}).sort({ _id: -1 }).limit(3);
+    res.json(products);
+})
+
+// @desc    Fetch all reviews for a product
+// @route   GET /api/products/:id/reviews
+// @access  Public
+const getProductReviews = asyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+        res.json(product.reviews);
+    } else {
+        res.status(404);
+        throw new Error('Product not found');
+    }
+});
+
+// @desc    Get all reviews
+// @route   GET /api/products/reviews
+// @access  Private/Admin
+const getAllReviews = asyncHandler(async (req, res) => {
+    const products = await Product.find({}).select('reviews name'); // Fetch only reviews and product names
+
+    const reviews = products.reduce((allReviews, product) => {
+        const productReviews = product.reviews.map(review => ({
+            ...review._doc, // Include review details
+            productName: product.name, // Add product name to each review
+            productId: product._id // Add product ID to each review
+        }));
+        return [...allReviews, ...productReviews];
+    }, []);
+
+    res.json(reviews);
+});
+
 export { 
     getProducts, 
     getProductById, 
@@ -161,5 +203,8 @@ export {
     updateProduct, 
     deleteProduct, 
     createProductReview, 
-    getTopProducts 
+    getProductReviews,
+    getAllReviews,
+    getTopProducts,
+    getLatestProducts
 };

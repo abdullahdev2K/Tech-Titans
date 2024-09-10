@@ -12,12 +12,13 @@ const AddNewProduct = () => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState(0);
   const [description, setDescription] = useState('');
+  const [specification, setSpecification] = useState('');
   const [category, setCategory] = useState('');
   const [countInStock, setCountInStock] = useState(0);
   const [brand, setBrand] = useState('');
   const [images, setImages] = useState([]);
   const [imagesPreview, setImagesPreview] = useState([]);
-  const [isFeatured, setIsFeatured] = useState(false);
+  const [isTrending, setIsFeatured] = useState(false);
 
   const categories = [
     'Select Category',
@@ -56,11 +57,12 @@ const AddNewProduct = () => {
         name,
         price,
         description,
+        specification,
         category,
         countInStock,
         brand,
         images,
-        isFeatured: isFeatured.toString()
+        isTrending: isTrending.toString()
     };
 
     dispatch(addProduct(formData));
@@ -134,6 +136,17 @@ const AddNewProduct = () => {
                   />
                 </Form.Group>
 
+                <Form.Group controlId="specification_field">
+                  <Form.Label>Specification</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    placeholder="Enter product specification"
+                    value={specification}
+                    onChange={(e) => setSpecification(e.target.value)}
+                  />
+                </Form.Group>
+
                 <Form.Group controlId="category_field">
                   <Form.Label>Category</Form.Label>
                   <Form.Control
@@ -185,13 +198,13 @@ const AddNewProduct = () => {
                   </div>
                 </Form.Group>
 
-                <Form.Group controlId="isFeatured_field">
+                <Form.Group controlId="isTrending_field">
                   <Form.Check
                     type="checkbox"
-                    label="Feature this product"
-                    checked={isFeatured}
+                    label="Trending Product"
+                    checked={isTrending}
                     className="mb-2"
-                    onChange={() => setIsFeatured(!isFeatured)}
+                    onChange={() => setIsFeatured(!isTrending)}
                   />
                 </Form.Group>
 

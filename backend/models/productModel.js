@@ -33,6 +33,11 @@ const productSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    specification:{
+        type: String,
+        required: true,
+        trim: true,
+    },
     brand: {
         type: String,
         required: true,
@@ -57,7 +62,7 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
     }],
-    isFeatured: {
+    isTrending: {
         type: Boolean,
         default: false,
     },

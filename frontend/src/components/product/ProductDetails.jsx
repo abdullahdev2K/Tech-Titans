@@ -1,16 +1,17 @@
 import { useState, useEffect, Fragment } from "react";
-import { Carousel, Button, Col, Container, Row, Modal, Form } from 'react-bootstrap';
+import { Carousel, Button, Col, Container, Row, Modal, Form, Card, Badge } from 'react-bootstrap';
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from "../layout/Loader";
 import MetaData from "../layout/MetaData";
 import { fetchProductDetails, addReview, clearErrors } from "../../slices/productSlice";
 import { addItemToCart } from "../../slices/cartSlice";
-import ShowReviews from "./ShowReviews";
+import ShowReviewsCarousel from "./ShowReviewsCarousel";
 import { useParams } from 'react-router-dom';
+import { FaStar } from "react-icons/fa";
 
 const ProductDetails = () => {
-    const { id } = useParams(); // Get the product ID from the URL
+    const { id } = useParams();
     const [quantity, setQuantity] = useState(1);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
@@ -52,13 +53,14 @@ const ProductDetails = () => {
     };
 
     const reviewHandler = () => {
-        const formData = new FormData();
-        formData.set("rating", rating);
-        formData.set("comment", comment);
-        formData.set("productId", id);
-        dispatch(addReview(formData));
+        const reviewData = {
+            rating,
+            comment,
+            productId: id
+        };
+        dispatch(addReview(reviewData));
         setModalShow(false);
-    };
+    };    
 
     return (
         <Fragment>
@@ -85,15 +87,24 @@ const ProductDetails = () => {
                                 <h1>{product.name}</h1>
                                 <div className="my-2">
                                     <div className="d-inline-block">
-                                        <div className="rating-outer">
-                                            <div className="rating-inner" style={{ width: `${(product.rating / 5) * 100}%` }}></div>
-                                        </div>
+                                        <Badge bg="warning" text="dark" className="me-2">
+                                            {product.rating} <FaStar />
+                                        </Badge>
                                         <span>({product.numReviews} Reviews)</span>
                                     </div>
                                 </div>
-                                <p>PKR {product.price}</p>
-                                <div className="d-flex align-items-center">
-                                    <Button variant="danger" onClick={decreaseQty}>-</Button>
+
+                                {/* Product Description */}
+                                <Card className="mt-3">
+                                    <Card.Body>
+                                        <Card.Title>Description</Card.Title>
+                                        <p>{product.description || "No description available."}</p>
+                                    </Card.Body>
+                                </Card>
+
+                                <p className="text-success h4 mt-3">PKR {product.price}</p>
+                                <div className="d-flex align-items-center mb-3">
+                                    <Button variant="outline-danger" onClick={decreaseQty}>-</Button>
                                     <Form.Control
                                         type="number"
                                         className="mx-2 text-center"
@@ -101,11 +112,11 @@ const ProductDetails = () => {
                                         readOnly
                                         style={{ maxWidth: '60px' }}
                                     />
-                                    <Button variant="primary" onClick={increaseQty}>+</Button>
+                                    <Button variant="outline-primary" onClick={increaseQty}>+</Button>
                                 </div>
                                 <Button
-                                    variant="success"
-                                    className="mt-3"
+                                    variant="outline-success"
+                                    className="mb-3"
                                     onClick={addToCart}
                                     disabled={product.countInStock === 0}
                                 >
@@ -114,8 +125,7 @@ const ProductDetails = () => {
                                 <p className={`mt-2 ${product.countInStock > 0 ? 'text-success' : 'text-danger'}`}>
                                     Status: {product.countInStock > 0 ? "In Stock" : "Out of Stock"}
                                 </p>
-                                <h4 className="mt-3">Description:</h4>
-                                <p>{product.description}</p>
+
                                 <p>Sold by: <strong>{product.brand}</strong></p>
                                 {user ? (
                                     <Button variant="primary" onClick={() => setModalShow(true)}>Submit Your Review</Button>
@@ -124,12 +134,44 @@ const ProductDetails = () => {
                                 )}
                             </Col>
                         </Row>
-                        {product.reviews && product.reviews.length > 0 && <ShowReviews reviews={product.reviews} />}
+
+                        {/* Specifications Section */}
+                        <Row className="my-5">
+                            <Col md={12}>
+                                <Card className="shadow">
+                                    <Card.Body>
+                                        <Card.Title className="mb-3">Specifications</Card.Title>
+                                        {product.specification ? (
+                                            <Row>
+                                                {product.specification.split(',').reduce((result, item, index) => {
+                                                    const half = Math.ceil(product.specification.split(',').length / 2);
+                                                    if (index < half) result[0].push(item.trim());
+                                                    else result[1].push(item.trim());
+                                                    return result;
+                                                }, [[], []]).map((column, colIndex) => (
+                                                    <Col key={colIndex} md={6}>
+                                                        <ul>
+                                                            {column.map((item, index) => (
+                                                                <li key={index}>{item}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </Col>
+                                                ))}
+                                            </Row>
+                                        ) : (
+                                            <p>No specifications available.</p>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+
+                        <h3 className="text-center mb-3">Customer Reviews</h3>
+
+                        {product.reviews && product.reviews.length > 0 && <ShowReviewsCarousel reviews={product.reviews} />}
                     </Container>
-                    <Modal
-                        show={modalShow}
-                        onHide={() => setModalShow(false)}
-                    >
+
+                    <Modal show={modalShow} onHide={() => setModalShow(false)}>
                         <Modal.Header closeButton>
                             <Modal.Title>Submit Review</Modal.Title>
                         </Modal.Header>
@@ -138,10 +180,14 @@ const ProductDetails = () => {
                                 {[1, 2, 3, 4, 5].map(star => (
                                     <span
                                         key={star}
-                                        className={`star ${rating >= star ? 'orange' : ''}`}
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: rating >= star ? '#ffcc00' : '#ccc',
+                                            fontSize: '1.5rem'
+                                        }}
                                         onClick={() => setRating(star)}
                                     >
-                                        <i className="fa fa-star"></i>
+                                        <FaStar />
                                     </span>
                                 ))}
                             </div>

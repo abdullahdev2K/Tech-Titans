@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect} from 'react';
 import { useDispatch } from 'react-redux';
 import axios from 'axios'; // Ensure axios is imported
 import { fetchUserProfile } from './slices/authSlice.js';
@@ -17,6 +17,7 @@ import AddNewProduct from './components/product/AddNewProduct.jsx';
 import ProductsGetAll from './components/product/ProductsGetAll.jsx';
 import ProductDetails from './components/product/ProductDetails.jsx';
 import UsersGetAll from './components/user/UsersGetAll.jsx';
+import ShowReviewsCarousel from './components/product/ShowReviewsCarousel.jsx';
 import UpdateUser from './components/user/UpdateUser.jsx';
 import UpdateProduct from './components/product/UpdateProduct.jsx';
 import './App.css';
@@ -51,6 +52,7 @@ function App() {
         <Route path='/admin/products' element={<ProductsGetAll />} />
         <Route path='/product/:id' element={<ProductDetails />} />
         <Route path='/admin/users' element={<UsersGetAll />} />
+        <Route path='/admin/reviews' element={<ShowReviewsCarousel />} />
         <Route path='/admin/edituser/:id' element={<UpdateUser />} />
         <Route path='/admin/updateproduct/:id' element={<UpdateProduct />} />
       </Routes>

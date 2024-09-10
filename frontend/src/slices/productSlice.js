@@ -23,6 +23,7 @@ export const fetchAdminProducts = createAsyncThunk('products/fetchAdminProducts'
     }
 });
 
+// Async thunk to update products
 export const editProduct = createAsyncThunk('product/editProduct', async ({ id, updatedProduct }, { rejectWithValue }) => {
     try {
         const config = {
@@ -31,7 +32,7 @@ export const editProduct = createAsyncThunk('product/editProduct', async ({ id, 
             }
         };
         const { data } = await axios.put(`${API_URL}/${id}`, updatedProduct, config);
-        return data.success ? true : false; // Ensure it returns a boolean value
+        return data.success ? true : false;
     } catch (error) {
         return rejectWithValue(error.response.data.message);
     }
@@ -58,14 +59,14 @@ export const fetchProductDetails = createAsyncThunk('product/fetchProductDetails
 });
 
 // Async thunk to add product review
-export const addReview = createAsyncThunk('product/addReview', async (formData, { rejectWithValue }) => {
+export const addReview = createAsyncThunk('product/addReview', async (reviewData, { rejectWithValue }) => {
     try {
         const config = {
             headers: {
                 'Content-Type': 'application/json'
             }
         };
-        const { data } = await axios.put(`/api/v1/review`, formData, config);
+        const { data } = await axios.post(`${API_URL}/${reviewData.productId}/reviews`, reviewData, config);
         return data.success;
     } catch (error) {
         return rejectWithValue(error.response.data.message);

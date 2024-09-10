@@ -12,6 +12,11 @@ import EuroCup from '../assets/Baseeta_EuroCup_Add10_HS_E_1.jpeg';
 import SamsungEuro from '../assets/Euro24_Samsung60TVss_HS_E.jpeg';
 import Iphone15 from '../assets/iPhone15ProMax_TabbyTamara_HS_E.jpeg';
 import SamsungHajjOffer from '../assets/S24BNPL_HS_E_2.png';
+import InstaItem1 from '../assets/insta-item1.jpg';
+import InstaItem2 from '../assets/insta-item2.jpg';
+import InstaItem3 from '../assets/insta-item3.jpg';
+import InstaItem4 from '../assets/insta-item4.jpg';
+import InstaItem5 from '../assets/insta-item5.jpg';
 import ShopNowAdv from '../assets/summer_LastPieceDeal_Full_E.png';
 import { FaMobile, FaLaptop, FaCameraRetro } from "react-icons/fa";
 import { IoTvSharp } from "react-icons/io5";
@@ -267,6 +272,51 @@ const Homepage = () => {
                             </Row>
                         </Container>
                     </section>
+
+                    <section id="instagram" className="bg-light">
+                        <Container>
+                            <Row>
+                                <div className="display-header text-uppercase text-dark text-center py-3">
+                                    <h2 className="display-7">Shop Our Insta</h2>
+                                </div>
+                                <div className="d-flex">
+                                    <figure className="instagram-item pe-2 w-25">
+                                    
+                                        <img
+                                            className="d-block w-100 h-100 object-fit-cover"
+                                            src={InstaItem1}
+                                            alt="First slide"
+                                        />
+                                    </figure>
+                                    <figure className="instagram-item pe-2 w-25">
+                                    
+                                        <img
+                                            className="d-block w-100 h-100 object-fit-cover"
+                                            src={InstaItem2}
+                                            alt="First slide"
+                                        />
+                                    </figure>
+                                    <figure className="instagram-item pe-2 w-25">
+                                    
+                                        <img
+                                            className="d-block w-100 h-100 object-fit-cover"
+                                            src={InstaItem3}
+                                            alt="First slide"
+                                        />
+                                    </figure>
+                                    <figure className="instagram-item pe-2 w-25">
+                                    
+                                        <img
+                                            className="d-block w-100 h-100 object-fit-cover"
+                                            src={InstaItem4}
+                                            alt="First slide"
+                                        />
+                                    </figure>
+                                </div>
+                            </Row>
+                        </Container>
+                    </section>
+
 
 
                 </Fragment>

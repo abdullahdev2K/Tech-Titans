@@ -25,9 +25,16 @@ productRoutes.route('/top')
 productRoutes.route('/:id')
   .get(productController.getProductById);  // Fetch a single product
 
+// Fetch all reviews for a specific product
+productRoutes.route('/:id/reviews')
+  .get(productController.getProductReviews);  // Get all reviews
+
 // Admin routes
 productRoutes.route('/add-new-product')
   .post(protect, admin, upload.array('images'), productController.createProduct);  // Create a product
+
+productRoutes.route('/reviews')
+  .get(protect, admin, productController.getAllReviews);  // Fetch all reviews
 
 productRoutes.route('/:id')
   .put(protect, admin, productController.updateProduct)  // Update a product
