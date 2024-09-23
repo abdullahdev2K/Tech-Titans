@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { resetCart, fetchCart } from './cartSlice';
 
 const API_URL = 'http://localhost:8080/api/users';
 
@@ -38,18 +39,32 @@ export const updatePassword = createAsyncThunk('auth/updatePassword', async (pas
 });
 
 // Async thunk for login
-export const login = createAsyncThunk('auth/login', async ({ email, password }, { rejectWithValue }) => {
-    try {
-        const response = await axios.post(`${API_URL}/login`, { email, password });
-        return response.data;
-    } catch (error) {
-        return rejectWithValue(error.response.data.message);
+// Async thunk for login
+export const login = createAsyncThunk(
+    'auth/login',
+    async ({ email, password }, { rejectWithValue, dispatch }) => {
+        try {
+            const response = await axios.post(`${API_URL}/login`, { email, password });
+            
+            // Set the token in localStorage before dispatching fetchCart
+            localStorage.setItem('authToken', response.data.token);
+            
+            // Dispatch fetchCart after login to load the user's cart
+            dispatch(fetchCart());
+
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data.message);
+        }
     }
-});
+);
+
 
 // Async thunk for logout
-export const logout = createAsyncThunk('auth/logout', async () => {
+export const logout = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
     await axios.post(`${API_URL}/logout`);
+    // Dispatch resetCart to clear the cart
+    dispatch(resetCart());
 });
 
 // Async thunk for reset password
@@ -140,7 +155,9 @@ export const deleteUser = createAsyncThunk('auth/deleteUser', async (userId, { r
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
-        user: null,
+        user: localStorage.getItem('authToken') 
+        ? localStorage.getItem('authToken') 
+        : null,
         userDetails: null,
         loading: false,
         error: null,

@@ -36,6 +36,9 @@ app.use("/api/products", productRoutes);
 import userRoutes from "./routes/userRoutes.js";
 app.use("/api/users", userRoutes);
 
+import cartRoutes from "./routes/cartRoutes.js";
+app.use("/api/cart", cartRoutes);
+
 import uploadRoutes from './routes/upload.js';
 app.use('/api', uploadRoutes);
 

@@ -20,6 +20,7 @@ import UsersGetAll from './components/user/UsersGetAll.jsx';
 import UpdateUser from './components/user/UpdateUser.jsx';
 import UpdateProduct from './components/product/UpdateProduct.jsx';
 import ReviewsGetAll from './components/product/ReviewsGetAll.jsx';
+import Cart from './components/order/Cart.jsx';
 import './App.css';
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
         <Route path='/admin/reviews' element={<ReviewsGetAll />} />
         <Route path='/admin/edituser/:id' element={<UpdateUser />} />
         <Route path='/admin/updateproduct/:id' element={<UpdateProduct />} />
+        <Route path='/cart' element={<Cart />} />
       </Routes>
       <Footer />
     </Router>

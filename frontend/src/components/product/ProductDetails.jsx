@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Loader from "../layout/Loader";
 import MetaData from "../layout/MetaData";
 import { fetchProductDetails, addReview, clearErrors } from "../../slices/productSlice";
-import { addItemToCart } from "../../slices/cartSlice";
+import { addToCart, fetchCart } from "../../slices/cartSlice";
 import ShowReviewsCarousel from "./ShowReviewsCarousel";
 import { useParams } from 'react-router-dom';
 import { FaStar } from "react-icons/fa";
@@ -39,9 +39,19 @@ const ProductDetails = () => {
         }
     }, [dispatch, error, reviewError, id, reviewSuccess]);
 
-    const addToCart = () => {
-        dispatch(addItemToCart({ id, quantity }));
-        toast.success("Item added to cart");
+    const handleAddToCart = (e) => {
+        e.preventDefault();
+        // Pass the selected quantity to the addToCart action
+        dispatch(addToCart({ productId: product._id, quantity }))
+            .unwrap()  // Unwrap the result to handle it directly
+            .then(() => {
+                // Optionally re-fetch cart to ensure consistency
+                dispatch(fetchCart());
+                toast.success("Item added to cart");
+            })
+            .catch((error) => {
+                toast.error("Failed to add item to cart");
+            });
     };
 
     const increaseQty = () => {
@@ -117,7 +127,7 @@ const ProductDetails = () => {
                                 <Button
                                     variant="outline-success"
                                     className="mb-3"
-                                    onClick={addToCart}
+                                    onClick={handleAddToCart}
                                     disabled={product.countInStock === 0}
                                 >
                                     Add to Cart
