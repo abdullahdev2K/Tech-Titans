@@ -1,10 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { clearCart } from './cartSlice.js';
+
+const API_URL = 'http://localhost:8080/api/orders';
 
 // Async thunk for fetching all orders
 export const fetchAllOrders = createAsyncThunk('order/fetchAllOrders', async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.get('/api/admin/orders');
+        const token = localStorage.getItem('authToken');
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        };
+        const response = await axios.get(`${API_URL}/admin/orders`, config);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data.message);
@@ -14,7 +23,7 @@ export const fetchAllOrders = createAsyncThunk('order/fetchAllOrders', async (_,
 // Async thunk for deleting an order
 export const removeOrder = createAsyncThunk('order/removeOrder', async (id, { rejectWithValue }) => {
     try {
-        const response = await axios.delete(`/api/admin/order/${id}`);
+        const response = await axios.delete(`${API_URL}/admin/order/${id}`);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data.message);
@@ -24,7 +33,13 @@ export const removeOrder = createAsyncThunk('order/removeOrder', async (id, { re
 // Async thunk for fetching order details
 export const fetchOrderDetails = createAsyncThunk('order/fetchOrderDetails', async (id, { rejectWithValue }) => {
     try {
-        const response = await axios.get(`/api/orders/${id}`);
+        const token = localStorage.getItem('authToken');
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        };
+        const response = await axios.get(`${API_URL}/${id}`, config);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data.message);
@@ -32,9 +47,16 @@ export const fetchOrderDetails = createAsyncThunk('order/fetchOrderDetails', asy
 });
 
 // Async thunk for processing an order
-export const processOrder = createAsyncThunk('order/processOrder', async ({ id, formData }, { rejectWithValue }) => {
+export const processOrder = createAsyncThunk('order/processOrder', async ({ id, orderData }, { rejectWithValue }) => {
     try {
-        const response = await axios.put(`/api/orders/${id}/process`, formData);
+        const token = localStorage.getItem('authToken');
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        };
+        const response = await axios.put(`${API_URL}/${id}/process`, orderData, config);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data.message);
@@ -42,9 +64,13 @@ export const processOrder = createAsyncThunk('order/processOrder', async ({ id, 
 });
 
 // Async thunk for creating a new order
-export const createOrder = createAsyncThunk('order/createOrder', async (order, { rejectWithValue }) => {
+export const createOrder = createAsyncThunk('order/createOrder', async (order, { dispatch, rejectWithValue }) => {
     try {
-        const response = await axios.post('/api/orders', order);
+        const response = await axios.post(`${API_URL}/`, order);
+        
+        // After successfully creating the order, clear the cart
+        dispatch(clearCart());
+
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data.message);
@@ -54,7 +80,14 @@ export const createOrder = createAsyncThunk('order/createOrder', async (order, {
 // Async thunk for fetching user's orders
 export const fetchMyOrders = createAsyncThunk('order/fetchMyOrders', async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.get('/api/orders/me');
+        const token = localStorage.getItem('authToken');
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        };
+        const response = await axios.get(`${API_URL}/me`, config);
         return response.data.orders;
     } catch (error) {
         return rejectWithValue(error.response.data.message);
@@ -137,7 +170,6 @@ const orderSlice = createSlice({
             })
             .addCase(processOrder.fulfilled, (state) => {
                 state.loading = false;
-                state.isUpdated = true;
             })
             .addCase(processOrder.rejected, (state, action) => {
                 state.loading = false;

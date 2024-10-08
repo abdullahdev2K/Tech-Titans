@@ -91,11 +91,10 @@ export const addProduct = createAsyncThunk('product/addProduct', async (formData
 // Async thunk for fetching reviews
 export const fetchReviews = createAsyncThunk('reviews/fetchReviews', async (_, { rejectWithValue, getState }) => {
     try {
-        const { user } = getState().auth;
-        // console.log(user.token);
+        const token = localStorage.getItem('authToken');
         const config = {
             headers: {
-                Authorization: `Bearer ${user.token}`,
+                Authorization: `Bearer ${token}`,
             },
         };        
         const response = await axios.get(`${API_URL}/reviews`, config);

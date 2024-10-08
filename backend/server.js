@@ -3,6 +3,8 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
+import passport from "./helpers/passport.js";
+import googleAuthRoutes from "./routes/googleauthRoute.js";
 import { fileURLToPath } from 'url';
 
 // Initialize dotenv
@@ -21,7 +23,10 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // Use CORS middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 
 const port = process.env.PORT || 9000;
 
@@ -39,8 +44,20 @@ app.use("/api/users", userRoutes);
 import cartRoutes from "./routes/cartRoutes.js";
 app.use("/api/cart", cartRoutes);
 
+import orderRoutes from "./routes/orderRoutes.js";
+app.use("/api/orders", orderRoutes);
+
+import paymentRoutes from "./routes/paymentRoutes.js";
+app.use('/api/v1', paymentRoutes);
+
 import uploadRoutes from './routes/upload.js';
 app.use('/api', uploadRoutes);
+
+// Initialize Passport for Google OAuth
+app.use(passport.initialize()); // No more sessions
+
+// Google OAuth routes
+app.use(googleAuthRoutes);
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

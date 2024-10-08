@@ -4,10 +4,7 @@ import axios from 'axios';
 const API_URL = 'http://localhost:8080/api/cart';
 
 // Thunk to fetch cart
-// fetchCart thunk in cartSlice.js
-export const fetchCart = createAsyncThunk(
-    'cart/fetchCart',
-    async (_, { rejectWithValue }) => {
+export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { rejectWithValue }) => {
         try {
             const token = localStorage.getItem('authToken');
             const config = {
@@ -98,6 +95,7 @@ const cartSlice = createSlice({
         totalPrice: 0,
         loading: false,
         error: null,
+        shippingInfo: {},
     },
     reducers: {
         resetCart: (state) => {
@@ -111,6 +109,9 @@ const cartSlice = createSlice({
             state.totalItems = totalItems;
             state.totalPrice = totalPrice;
         },
+        saveShippingInfo: (state, action) => {
+            state.shippingInfo = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -191,5 +192,5 @@ const cartSlice = createSlice({
     },
 });
 
-export const { resetCart, setCart } = cartSlice.actions;
+export const { resetCart, setCart, saveShippingInfo } = cartSlice.actions;
 export default cartSlice.reducer;

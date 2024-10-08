@@ -1,4 +1,4 @@
-import { useEffect} from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { fetchUserProfile } from './slices/authSlice.js';
@@ -21,21 +21,42 @@ import UpdateUser from './components/user/UpdateUser.jsx';
 import UpdateProduct from './components/product/UpdateProduct.jsx';
 import ReviewsGetAll from './components/product/ReviewsGetAll.jsx';
 import Cart from './components/order/Cart.jsx';
+import Shipping from './components/order/Shipping.jsx';
+import ConfirmOrder from './components/order/ConfirmOrder.jsx';
+import OrderSuccess from './components/order/OrderSuccess.jsx';
+import OrderDetails from './components/order/OrderDetails.jsx';
+import OrdersGetAll from './components/order/OrdersGetAll.jsx';
+import OrderProcess from './components/order/OrderProcess.jsx';
+import ShowOrders from './components/user/ShowOrders.jsx';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import Payment from './components/order/Payment.jsx';
 import './App.css';
 
 function App() {
   const dispatch = useDispatch();
+
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         dispatch(fetchUserProfile())
             .catch(err => {
-                // Handle error (e.g., redirect to login)
                 console.error('Failed to fetch user profile:', err);
             });
     }
   }, [dispatch]);
+
+  const [stripePromise, setStripePromise] = useState(null);
+
+  useEffect(() => {
+    const getStripeApiKey = async () => {
+      const { data } = await axios.get('http://localhost:8080/api/v1/stripeapikey');
+      setStripePromise(loadStripe(data.stripeApiKey));
+    };
+
+    getStripeApiKey();
+  }, []);
 
   return (
     <Router>
@@ -57,10 +78,27 @@ function App() {
         <Route path='/admin/edituser/:id' element={<UpdateUser />} />
         <Route path='/admin/updateproduct/:id' element={<UpdateProduct />} />
         <Route path='/cart' element={<Cart />} />
+        <Route path='/shipping' element={<Shipping />} />
+        <Route path='/order/confirm' element={<ConfirmOrder />} />
+        <Route path='/order/success' element={<OrderSuccess />} />
+        <Route path='/orders' element={<ShowOrders />} />
+        <Route path='/order/:id' element={<OrderDetails />} />
+        <Route path='/admin/orders' element={<OrdersGetAll />} />
+        <Route path='/admin/orders/:id/process' element={<OrderProcess />} />
+        <Route 
+          path='/payment' 
+          element={
+            stripePromise && (
+              <Elements stripe={stripePromise}>
+                <Payment />
+              </Elements>
+            )
+          }
+        />
       </Routes>
       <Footer />
     </Router>
-  )
+  );
 }
 
 export default App;

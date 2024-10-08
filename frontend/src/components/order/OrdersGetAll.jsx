@@ -1,32 +1,43 @@
 import { Fragment, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MDBDataTable } from "mdbreact";
-import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { Row, Col, Container, Button, Card } from "react-bootstrap";
+import { FaEye, FaTrashAlt } from "react-icons/fa";
 
 import Loader from "../layout/Loader";
 import MetaData from "../layout/MetaData";
-
-import { fetchAllOrders, removeOrder, clearErrors, DELETE_ORDER_RESET } from "../../features/order/orderSlice";
 import Sidebar from "../layout/Sidebar.jsx";
 
-const OrdersGetAll = ({ history }) => {
+import {
+    fetchAllOrders,
+    removeOrder,
+    clearErrors,
+    resetDeleteOrder,
+} from "../../slices/orderSlice.js";
+
+const OrdersGetAll = () => {
     const dispatch = useDispatch();
-    const { loading, error, orders } = useSelector((state) => state.allOrders);
-    const { isDeleted } = useSelector((state) => state.order);
+    const navigate = useNavigate();
+    const { loading, error, orders, isDeleted } = useSelector(
+        (state) => state.orders
+    );
 
     useEffect(() => {
         dispatch(fetchAllOrders());
+
         if (error) {
             toast.error(error);
             dispatch(clearErrors());
         }
+
         if (isDeleted) {
             toast.success("Order deleted successfully!!");
-            history.push("/admin/orders");
-            dispatch({ type: DELETE_ORDER_RESET });
+            navigate("/admin/orders");
+            dispatch(resetDeleteOrder());
         }
-    }, [dispatch, error, history, isDeleted]);
+    }, [dispatch, error, isDeleted, navigate]);
 
     const deleteOrderHandler = (id) => {
         dispatch(removeOrder(id));
@@ -35,62 +46,48 @@ const OrdersGetAll = ({ history }) => {
     const setOrders = () => {
         const data = {
             columns: [
-                {
-                    label: "Order Id",
-                    field: "id",
-                    sort: "asc",
-                },
-                {
-                    label: "No of Items",
-                    field: "numOfItems",
-                    sort: "asc",
-                },
-                {
-                    label: "Amount",
-                    field: "amount",
-                    sort: "asc",
-                },
-                {
-                    label: "Status",
-                    field: "status",
-                    sort: "asc",
-                },
-                {
-                    label: "Actions",
-                    field: "actions",
-                },
+                { label: "Order Id", field: "id", sort: "asc" },
+                { label: "No of Items", field: "numOfItems", sort: "asc" },
+                { label: "Amount", field: "amount", sort: "asc" },
+                { label: "Status", field: "status", sort: "asc" },
+                { label: "Actions", field: "actions" },
             ],
             rows: [],
         };
+
         orders &&
             orders.forEach((order) => {
                 data.rows.push({
                     id: order._id,
                     numOfItems: order.orderItems.length,
-                    amount: `$${order.totalPrice}`,
-                    status: order.orderStatus && String(order.orderStatus).includes("Delivered") ? (
-                        <p style={{ color: "green" }}>{order.orderStatus}</p>
-                    ) : (
-                        <p style={{ color: "red" }}>{order.orderStatus}</p>
-                    ),
+                    amount: `PKR ${order.totalPrice}`,
+                    status:
+                        order.orderStatus &&
+                        String(order.orderStatus).includes("Delivered") ? (
+                            <p style={{ color: "green" }}>{order.orderStatus}</p>
+                        ) : (
+                            <p style={{ color: "red" }}>{order.orderStatus}</p>
+                        ),
                     actions: (
-                        <>
+                        <div className="d-flex justify-content-center">
                             <Link
-                                to={`/admin/order/${order._id}`}
+                                to={`/admin/orders/${order._id}/process`}
                                 title="Order Process"
-                                className="btn btn-success py-1 px-2 ml-2"
+                                className="btn btn-outline-success btn-sm mx-1"
                             >
-                                <i className="fa fa-eye"></i>
+                                <FaEye />
                             </Link>
 
-                            <button
-                                className="btn btn-danger py-1 px-2 ml-2"
-                                onClick={() => deleteOrderHandler(order._id)}
+                            <Button
+                                variant="outline-danger"
+                                size="sm"
                                 title="Delete Order"
+                                onClick={() => deleteOrderHandler(order._id)}
+                                className="mx-1"
                             >
-                                <i className="fa fa-trash"></i>
-                            </button>
-                        </>
+                                <FaTrashAlt />
+                            </Button>
+                        </div>
                     ),
                 });
             });
@@ -100,27 +97,34 @@ const OrdersGetAll = ({ history }) => {
     return (
         <Fragment>
             <MetaData title={"Show All Orders"} />
-            <div className="row">
-                <div className="col-12 col-md-2">
-                    <Sidebar />
-                </div>
-                <div className="col-12 col-md-10">
-                    <Fragment>
-                        <h1 className="my-5 text-center white"> Show All Orders </h1>
-                        {loading ? (
-                            <Loader />
-                        ) : (
-                            <MDBDataTable
-                                data={setOrders()}
-                                className="px-3 py-3 box-cart purple"
-                                bordered
-                                striped
-                                hover
-                            />
-                        )}
-                    </Fragment>
-                </div>
-            </div>
+            <Container fluid>
+                <Row className="mt-4">
+                    <Col md={2}>
+                        <Sidebar />
+                    </Col>
+                    <Col md={10}>
+                        <Card className="shadow-sm border-0">
+                            <Card.Header className="bg-primary text-white text-center">
+                                <h4 className="mb-0">All Orders</h4>
+                            </Card.Header>
+                            <Card.Body>
+                                {loading ? (
+                                    <Loader />
+                                ) : (
+                                    <MDBDataTable
+                                        data={setOrders()}
+                                        className="table table-hover mb-0"
+                                        bordered
+                                        striped
+                                        responsive
+                                        style={{ cursor: "pointer" }}
+                                    />
+                                )}
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            </Container>
         </Fragment>
     );
 };

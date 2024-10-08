@@ -4,8 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { createOrder, clearErrors } from "../../slices/orderSlice";
 import CheckoutSteps from './CheckoutSteps';
 import { useStripe, useElements, CardNumberElement, CardExpiryElement, CardCvcElement } from "@stripe/react-stripe-js";
-import axios from "axios";
 import { toast } from "react-toastify";
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const options = {
     style: {
@@ -18,14 +20,15 @@ const options = {
     }
 };
 
-const Payment = ({ history }) => {
+const Payment = () => {
     const stripe = useStripe();
     const elements = useElements();
     const dispatch = useDispatch();
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const { user } = useSelector(state => state.auth);
-    const { cartItems, shippingInfo } = useSelector(state => state.cart);
-    const { error } = useSelector(state => state.newOrder);
+    const { items, shippingInfo } = useSelector(state => state.cart);
+    const { error } = useSelector(state => state.orders);
 
     useEffect(() => {
         if (error) {
@@ -35,7 +38,7 @@ const Payment = ({ history }) => {
     }, [dispatch, error]);
 
     const order = {
-        orderItems: cartItems,
+        orderItems: items,
         shippingInfo
     };
 
@@ -54,14 +57,22 @@ const Payment = ({ history }) => {
     const processHandler = async (e) => {
         e.preventDefault();
         document.querySelector("#pay_btn").disabled = true;
+
         try {
             const config = {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             };
-            const res = await axios.post("/api/v1/payment/process", paymentData, config);
-            const clientSecret = res.data.client_secret;
+
+            // Make the payment request
+            const res = await axios.post("http://localhost:8080/api/v1/payment/process", paymentData, config);
+            
+            const clientSecret = res.data.client_secret; // Accessing client_secret
+
+            if (!clientSecret) {
+                throw new Error("Client secret not found in the response.");
+            }
 
             if (!stripe || !elements) {
                 return;
@@ -82,69 +93,97 @@ const Payment = ({ history }) => {
                 document.querySelector("#pay_btn").disabled = false;
             } else {
                 if (result.paymentIntent.status === "succeeded") {
+                    // Ensure order contains all required fields
                     order.paymentInfo = {
                         id: result.paymentIntent.id,
                         status: result.paymentIntent.status,
                     };
+
+                    // Populate shippingInfo with required fields
+                    if (shippingInfo) {
+                        order.shippingInfo = {
+                            phone: shippingInfo.phone,
+                            country: shippingInfo.country,
+                            postalCode: shippingInfo.postalCode,
+                            city: shippingInfo.city,
+                            address: shippingInfo.address,
+                        };
+                    }
+
+                    // Ensure orderItems are populated correctly
+                    order.orderItems = items.map(item => ({
+                        product: item.product, // Ensure name exists
+                        quantity: item.quantity, // Add other necessary fields
+                        price: item.price // Assuming you have this field
+                    }));
+
                     dispatch(createOrder(order));
-                    history.push("/success");
+                    navigate("/order/success"); // Use navigate instead of history.push
                 } else {
                     toast.error("There was an issue processing your payment.");
                 }
             }
         } catch (error) {
             document.querySelector("#pay_btn").disabled = false;
-            toast.error(error.response.data.message);
+
+            // Enhanced error handling
+            console.error(error);
+            const errorMessage = error.response ? error.response.data.message : error.message || "Payment processing failed.";
+            toast.error(errorMessage);
         }
     };
-
+    
     return (
         <Fragment>
             <MetaData title={'Payment'} />
             <CheckoutSteps shipping confirmOrder payment />
-            <div className="row wrapper">
-                <div className="col-10 col-lg-5">
-                    <form className="shadow-lg" onSubmit={processHandler}>
-                        <h1 className="mb-2 text-center purple">Card Info</h1>
-                        <div className="form-group">
-                            <label htmlFor="card_num_field">Card Number</label>
-                            <CardNumberElement
-                                type="text"
-                                id="card_num_field"
-                                className="form-control"
-                                options={options}
-                            />
-                        </div>
+            
+            <Container className="my-5">
+                <Row className="justify-content-center">
+                    <Col xs={12} md={6} lg={5}>
+                        <Form className="shadow-lg p-4" onSubmit={processHandler}>
+                            <h2 className="mb-4 text-center text-black">Card Info</h2>
 
-                        <div className="form-group">
-                            <label htmlFor="card_exp_field">Card Expiry</label>
-                            <CardExpiryElement
-                                type="text"
-                                id="card_exp_field"
-                                className="form-control"
-                                options={options}
-                            />
-                        </div>
+                            <Form.Group controlId="card_num_field" className="mb-3">
+                                <Form.Label>Card Number</Form.Label>
+                                <CardNumberElement 
+                                    type="text" 
+                                    className="form-control" 
+                                    options={options} 
+                                />
+                            </Form.Group>
 
-                        <div className="form-group">
-                            <label htmlFor="card_cvc_field">Card CVC</label>
-                            <CardCvcElement
-                                type="text"
-                                id="card_cvc_field"
-                                className="form-control"
-                                options={options}
-                            />
-                        </div>
+                            <Form.Group controlId="card_exp_field" className="mb-3">
+                                <Form.Label>Card Expiry</Form.Label>
+                                <CardExpiryElement 
+                                    type="text" 
+                                    className="form-control" 
+                                    options={options} 
+                                />
+                            </Form.Group>
 
-                        <button
-                            id="pay_btn"
-                            type="submit"
-                            className="btn btn-block py-2">
-                            Pay {` - ${orderInfo && orderInfo.totalPrice}`}
-                        </button>
-                    </form>
-                </div>
-            </div>
+                            <Form.Group controlId="card_cvc_field" className="mb-3">
+                                <Form.Label>Card CVC</Form.Label>
+                                <CardCvcElement 
+                                    type="text" 
+                                    className="form-control" 
+                                    options={options} 
+                                />
+                            </Form.Group>
+
+                            <Button 
+                                id="pay_btn" 
+                                type="submit" 
+                                variant="primary" 
+                                className="btn-block py-2"
+                                disabled={!stripe || !elements}
+                            >
+                                Pay {` - PKR ${orderInfo && orderInfo.totalPrice}`}
+                            </Button>
+                        </Form>
+                    </Col>
+                </Row>
+            </Container>
         </Fragment>
     );
 };

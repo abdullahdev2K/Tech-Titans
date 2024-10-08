@@ -1,82 +1,100 @@
 import { Fragment, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
+import { Container, Row, Col, Card, Image, Button } from "react-bootstrap";
 import Loader from "../layout/Loader";
 import MetaData from "../layout/MetaData";
-
 import { fetchOrderDetails, clearErrors } from "../../slices/orderSlice.js";
 
-const OrderDetails = ({ match }) => {
+const OrderDetails = () => {
+    const { id } = useParams(); 
     const dispatch = useDispatch();
-    const { loading, error, order={} } = useSelector(state => state.orderDetails);
+    const { loading, error, order = {} } = useSelector((state) => state.orders);
     const { shippingInfo, orderItems, paymentInfo, user, totalPrice, orderStatus } = order;
-    const shippingDetails = shippingInfo && `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.postalCode}, ${shippingInfo.country}`;
-    const isPaid = paymentInfo && paymentInfo.status === "succeeded" ? true : false;
+
+    const shippingDetails = shippingInfo ? `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.postalCode}, ${shippingInfo.country}` : "";
+
+    const isPaid = paymentInfo && paymentInfo.status === "succeeded";
 
     useEffect(() => {
-        dispatch(fetchOrderDetails(match.params.id));
+        dispatch(fetchOrderDetails(id)); 
         if (error) {
             toast.error(error);
             dispatch(clearErrors());
         }
-    }, [dispatch, error, match.params.id]);
+    }, [dispatch, error, id]);
 
     return (
         <Fragment>
             <MetaData title="Order Details" />
-            {loading ? <Loader /> : (
-                <Fragment>
-                    <br /><br />
-                    <div className="mt-5 row d-flex justify-content-between box-cart ">
-                        <div className="col-12 col-lg-8 mt-3 order-details">
+            {loading ? (
+                <Loader />
+            ) : (
+                <Container className="mt-5">
+                    <Row className="justify-content-center">
+                        <Col lg={8}>
+                            <Card className="p-4 shadow-lg">
+                                <Card.Body>
+                                    <Card.Title className="text-center mb-4">
+                                        Order #{order._id}
+                                    </Card.Title>
+                                    <Card.Subtitle className="mb-3">Shipping Info</Card.Subtitle>
+                                    <p><strong>Name:</strong> {user && user.name}</p>
+                                    <p><strong>Phone:</strong> {shippingInfo && shippingInfo.phone}</p>
+                                    <p><strong>Address:</strong> {shippingDetails}</p>
+                                    <p><strong>Amount:</strong> PKR {totalPrice}</p>
 
-                            <h1 className="my-4 purple text-center">Order # {order._id}</h1>
+                                    <hr />
 
-                            <h4 className="mb-4 purple">Shipping Info</h4>
-                            <p><b className="purple">Name:</b> {user && user.name}</p>
-                            <p><b className="purple">Phone:</b> {shippingInfo && shippingInfo.phoneNo}</p>
-                            <p className="mb-4"><b className="purple">Address:</b>{shippingDetails}</p>
-                            <p><b className="purple">Amount:</b> ${totalPrice}</p>
+                                    <Card.Subtitle className="mb-3">Payment</Card.Subtitle>
+                                    <p>
+                                        <span className={`badge ${isPaid ? 'bg-success' : 'bg-danger'}`}>
+                                        {isPaid ? "PAID" : "NOT PAID"}
+                                        </span>
+                                    </p>
 
-                            <hr />
+                                    <Card.Subtitle className="mb-3">Order Status</Card.Subtitle>
+                                    <p>
+                                        <span className={`badge ${orderStatus && orderStatus.includes("Delivered") ? 'bg-success' : 'bg-danger'}`}>
+                                        {orderStatus}
+                                        </span>
+                                    </p>
 
-                            <h4 className="my-4 purple">Payment</h4>
-                            <p className={isPaid ? "greenColor" : "redColor"} ><b>
-                                {isPaid ? "PAID" : "NOT PAID"}
-                            </b></p>
+                                    <hr />
 
-                            <h4 className="my-4 purple">Order Status:</h4>
-                            <p className={order.orderStatus && String(order.orderStatus).includes("Delivered") ? "greenColor" : "redColor"}><b>{orderStatus}</b></p>
-
-                            <h4 className="my-4 purple">Order Items:</h4>
-
-                            <hr />
-                            <div className="cart-item my-1">
-                                {orderItems && orderItems.map(item => (
-                                    <div key={item.product} className="row my-5">
-                                        <div className="col-4 col-lg-2">
-                                            <img src={item.image} alt={item.name} height="45" width="65" />
-                                        </div>
-                                        <div className="col-5 col-lg-5">
-                                            <Link to={`/product/${item.product}`}>
-                                                {item.name}
+                                    <Card.Subtitle className="mb-3">Order Items</Card.Subtitle>
+                                    {orderItems && orderItems.map((item) => (
+                                        <Row className="mb-4 align-items-center" key={item.product}>
+                                        <Col xs={3} md={2}>
+                                            <Image src={item.product.images[0]} alt={item.product.name} fluid rounded />
+                                        </Col>
+                                        <Col xs={5} md={6}>
+                                            <Link to={`/product/${item.product._id}`} className="text-decoration-none text-black">
+                                            {item.product.name}
                                             </Link>
-                                        </div>
-                                        <div className="col-4 col-lg-2 mt-4 mt-lg-0">
-                                            <p>${item.price} </p>
-                                        </div>
-                                        <div className="col-4 col-lg-3 mt-4 mt-lg-0">
-                                            <p>{item.quantity} Piece(s)</p>
-                                        </div>
+                                        </Col>
+                                        <Col xs={2} className="text-center">
+                                            <p className="mb-0">PKR {item.price}</p>
+                                        </Col>
+                                        <Col xs={2} className="text-center">
+                                            <p className="mb-0">{item.quantity} Piece(s)</p>
+                                        </Col>
+                                        </Row>
+                                    ))}
+
+                                    <hr />
+
+                                    <div className="d-flex justify-content-center mt-4">
+                                        <Button variant="primary" as={Link} to="/orders">
+                                            Back to Orders
+                                        </Button>
                                     </div>
-                                ))}
-                            </div>
-                            <hr />
-                        </div>
-                    </div>
-                </Fragment>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                </Container>
             )}
         </Fragment>
     );

@@ -1,51 +1,54 @@
 import React from 'react';
 import { Link } from "react-router-dom";
+import { Container, Row, Col } from 'react-bootstrap';
 
 const CheckoutSteps = ({ shipping, confirmOrder, payment }) => {
     return (
-        <div className="checkout-progress d-flex justify-content-center mt-5">
-            {shipping ? (
-                <Link to="/shipping" className="float-right">
-                    <div className='triangle2-active'></div>
-                    <div className='step active-step'>Shipping</div>
-                    <div className='triangle-active'></div>
-                </Link>
-            ) : (
-                <div className='disabled-step'>
-                    <div className='triangle2-incomplete'></div>
-                    <div className='step incomplete'>Shipping</div>
-                    <div className='triangle-incomplete'></div>
-                </div>
-            )}
+        <Container className="my-5">
+            <Row className="justify-content-center">
+                <Col xs={12} md={4} className="text-center">
+                    {shipping ? (
+                        <Link to="/shipping" className="checkout-step text-decoration-none">
+                            <div className="step-circle bg-primary text-white">1</div>
+                            <p className="step-label mt-2">Shipping</p>
+                        </Link>
+                    ) : (
+                        <div className="checkout-step disabled-step">
+                            <div className="step-circle bg-light text-muted">1</div>
+                            <p className="step-label mt-2 text-muted">Shipping</p>
+                        </div>
+                    )}
+                </Col>
 
-            {confirmOrder ? (
-                <Link to="/order/confirm" className="float-right">
-                    <div className='triangle2-active'></div>
-                    <div className='step active-step'>Confirm Order</div>
-                    <div className='triangle-active'></div>
-                </Link>
-            ) : (
-                <div className='disabled-step'>
-                    <div className='triangle2-incomplete'></div>
-                    <div className='step incomplete'>Confirm Order</div>
-                    <div className='triangle-incomplete'></div>
-                </div>
-            )}
+                <Col xs={12} md={4} className="text-center">
+                    {confirmOrder ? (
+                        <Link to="/order/confirm" className="checkout-step text-decoration-none">
+                            <div className="step-circle bg-primary text-white">2</div>
+                            <p className="step-label mt-2">Confirm Order</p>
+                        </Link>
+                    ) : (
+                        <div className="checkout-step disabled-step">
+                            <div className="step-circle bg-light text-muted">2</div>
+                            <p className="step-label mt-2 text-muted">Confirm Order</p>
+                        </div>
+                    )}
+                </Col>
 
-            {payment ? (
-                <Link to="/order/payment" className="float-right">
-                    <div className='triangle2-active'></div>
-                    <div className='step active-step'>Payment</div>
-                    <div className='triangle-active'></div>
-                </Link>
-            ) : (
-                <div className='disabled-step'>
-                    <div className='triangle2-incomplete'></div>
-                    <div className='step incomplete'>Payment</div>
-                    <div className='triangle-incomplete'></div>
-                </div>
-            )}
-        </div>
+                <Col xs={12} md={4} className="text-center">
+                    {payment ? (
+                        <Link to="/order/payment" className="checkout-step text-decoration-none">
+                            <div className="step-circle bg-primary text-white">3</div>
+                            <p className="step-label mt-2">Payment</p>
+                        </Link>
+                    ) : (
+                        <div className="checkout-step disabled-step">
+                            <div className="step-circle bg-light text-muted">3</div>
+                            <p className="step-label mt-2 text-muted">Payment</p>
+                        </div>
+                    )}
+                </Col>
+            </Row>
+        </Container>
     );
 };
 
